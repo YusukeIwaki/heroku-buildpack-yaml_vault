@@ -1,19 +1,41 @@
-#!/bin/sh
-# bin/compile <build-dir> <cache-dir>
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir> <env-dir>
 
-echo "Build dir: $1"
-echo "Cache dir: $2"
+indent0() {
+  sed -u 's/^/------>/'
+}
 
-echo "ENV"
-env
+indent() {
+  sed -u 's/^/       /'
+}
 
-echo $PWD
+export_yaml_vault_env_dir() {
+  env_dir=$1
+  if [ -d "$env_dir" ]; then
+    for e in $(ls $env_dir); do
+      echo "$e" | grep YAML_VAULT_PASSPHRASE &&
+      export "$e=$(cat $env_dir/$e)"
+      :
+    done
+  fi
+}
 
-cd $1
-git status
+export_yaml_vault_env_dir $3
 
-echo "Build dir contents"
-ls -R $1
+TMP_GEM_DIR=/tmp/gem
 
-echo "Cache dir contents"
-ls -R $2
+echo 'Install yaml_vault' | indent0
+mkdir -p $TMP_GEM_DIR
+GEM_HOME=$TMP_GEM_DIR gem install yaml_vault
+
+pushd $1
+echo 'ls -l config/secrets.yml*' | indent0
+ls -l config/secrets.yml* | indent
+echo 'yaml_vault decrypt config/secrets.yml.enc -o config/secrets.yml' | indent0
+GEM_HOME=$TMP_GEM_DIR $TMP_GEM_DIR/bin/yaml_vault decrypt config/secrets.yml.enc -o config/secrets.yml
+rm config/secrets.yml.enc
+echo 'ls -l config/secrets.yml*' | indent0
+ls -l config/secrets.yml* | indent
+popd
+
+rm -rf $TMP_GEM_DIR

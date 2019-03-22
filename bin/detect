@@ -1,4 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env bash
+# bin/detect <build-dir>
 
-echo "Using heroku-buildpack-debug"
-exit 0
+indent() {
+  sed -u 's/^/       /'
+}
+
+if (test -f $1/config/secrets.yml.enc) then
+  echo "Trying to decrypt config/secrets.yml.enc with yaml_vault."
+  exit 0
+else
+  echo "config/secrets.yml.enc not found."
+  exit 1
+fi | indent
