@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "Using heroku-buildpack-debug"
+exit 0

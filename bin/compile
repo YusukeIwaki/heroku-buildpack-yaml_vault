@@ -1,0 +1,19 @@
+#!/bin/sh
+# bin/compile <build-dir> <cache-dir>
+
+echo "Build dir: $1"
+echo "Cache dir: $2"
+
+echo "ENV"
+env
+
+echo $PWD
+
+cd $1
+git status
+
+echo "Build dir contents"
+ls -R $1
+
+echo "Cache dir contents"
+ls -R $2
